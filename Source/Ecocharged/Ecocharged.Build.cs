@@ -14,7 +14,12 @@ public class Ecocharged : ModuleRules
 			"CoreUObject", 
 			"Engine", 
 			"InputCore", 
-			"EnhancedInput" 
+			"EnhancedInput",
+			"GameplayAbilities",
+			"GameplayTasks",
+			"GameplayTags",
+			"AIModule",
+			"UMG"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

@@ -2,16 +2,26 @@
 
 #include "Actors/Player/EcoPlayerController.h"
 
+#include <EnhancedInputComponent.h>
+
 #include "Actors/Player/EcoCharacter.h"
 #include "Actors/Player/EcoPlayerCameraManager.h"
 
-#include <EnhancedInputComponent.h>
-#include <Framework/InputConfigDataAsset.h>
-#include <GameFramework/Character.h>
+#include "Framework/InputConfigDataAsset.h"
+
+#include "GAS/EcoAbilitySystemComponent.h"
+#include "GAS/EcoAttributeSet.h"
+#include "GAS/Abilities/EcoGameplayAbility.h"
 
 AEcoPlayerController::AEcoPlayerController()
 {
 	PlayerCameraManagerClass = AEcoPlayerCameraManager::StaticClass();
+
+	AbilitySystem = CreateDefaultSubobject<UEcoAbilitySystemComponent>(TEXT("Ability System"));
+	AbilitySystem->SetIsReplicated(true);
+	AbilitySystem->SetReplicationMode(EGameplayEffectReplicationMode::Full);
+
+	Attributes = CreateDefaultSubobject<UEcoAttributeSet>(TEXT("Attributes"));
 }
 
 void AEcoPlayerController::BeginPlay()
@@ -30,6 +40,21 @@ void AEcoPlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
 	{
+		const FTopLevelAssetPath AssetPath = FTopLevelAssetPath(
+			FName("/Script/Ecocharged"),
+			FName("EEcoInputs")
+		);
+
+		AbilitySystem->BindAbilityActivationToInputComponent(InputComponent,
+			FGameplayAbilityInputBinds(
+				FString("ConfirmTarget"),
+				FString("CancelTarget"),
+				AssetPath,
+				static_cast<int32>(EEcoInputs::Confirm),
+				static_cast<int32>(EEcoInputs::Cancel)
+			)
+		);
+
 		if(const UInputAction* Action = InputConfig->Find(EEcoInputs::Move))
 		{
 			EnhancedInput->BindAction(Action, ETriggerEvent::Triggered, this, &AEcoPlayerController::Move);
@@ -40,11 +65,21 @@ void AEcoPlayerController::SetupInputComponent()
 			EnhancedInput->BindAction(Action, ETriggerEvent::Triggered, this, &AEcoPlayerController::Look);
 		}
 
-		if (const UInputAction* Action = InputConfig->Find(EEcoInputs::Jump))
+		for (TSubclassOf<UEcoGameplayAbility> AbilityClass : DefaultAbilities)
 		{
-			EnhancedInput->BindAction(Action, ETriggerEvent::Started, CurrentCharacter, &ACharacter::Jump);
-			EnhancedInput->BindAction(Action, ETriggerEvent::Completed, CurrentCharacter, &ACharacter::StopJumping);
-			EnhancedInput->BindAction(Action, ETriggerEvent::Canceled, CurrentCharacter, &ACharacter::StopJumping);
+			if (!AbilityClass)
+			{
+				continue;
+			}
+
+			if (const UEcoGameplayAbility* Ability = AbilityClass.GetDefaultObject())
+			{
+				Ability->Bind(InputConfig,
+					EnhancedInput,
+					this,
+					&AEcoPlayerController::ActivateAbility,
+					&AEcoPlayerController::EndAbility);
+			}
 		}
 	}
 }
@@ -55,9 +90,61 @@ void AEcoPlayerController::AcknowledgePossession(APawn* P)
 
 	CurrentCharacter = Cast<AEcoCharacter>(P);
 
+	if (IsValid(CurrentCharacter))
+	{
+		InitializeAttributes();
+		GiveAbilities();
+	}
+
 	if (IsValid(InputConfig))
 	{
 		InputConfig->BindContext(this);
+	}
+}
+
+void AEcoPlayerController::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	InitializeAttributes();
+}
+
+void AEcoPlayerController::InitializeAttributes()
+{
+	if (DefaultAttributes)
+	{
+		FGameplayEffectContextHandle EffectContext = AbilitySystem->MakeEffectContext();
+		EffectContext.AddSourceObject(this);
+
+		const FGameplayEffectSpecHandle SpecHandle = AbilitySystem->MakeOutgoingSpec(
+			DefaultAttributes, 1, EffectContext
+		);
+
+		if (SpecHandle.IsValid())
+		{
+			AbilitySystem->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		}
+	}
+}
+
+void AEcoPlayerController::GiveAbilities()
+{
+	if (DefaultAbilities.Num() > 0 && HasAuthority())
+	{
+		for (TSubclassOf<UEcoGameplayAbility> DefaultAbility : DefaultAbilities)
+		{
+			if (DefaultAbility)
+			{
+				AbilitySystem->GiveAbility(
+					FGameplayAbilitySpec(
+						DefaultAbility.Get(), 
+						1,
+						static_cast<int32>(DefaultAbility.GetDefaultObject()->ID()), 
+						this
+					)
+				);
+			}
+		}
 	}
 }
 
@@ -85,5 +172,16 @@ void AEcoPlayerController::Look(const FInputActionValue& Value)
 	if (IsValid(CurrentCharacter))
 	{
 		CurrentCharacter->AddControllerYawInput(LookVector.X);
+		CurrentCharacter->ApplyZoom(LookVector.Y);
 	}
+}
+
+void AEcoPlayerController::ActivateAbility(int32 AbilityID)
+{
+	AbilitySystem->AbilityLocalInputPressed(AbilityID);
+}
+
+void AEcoPlayerController::EndAbility(int32 AbilityID)
+{
+	AbilitySystem->AbilityLocalInputReleased(AbilityID);
 }
