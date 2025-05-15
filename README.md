@@ -87,7 +87,7 @@ This remake is intended for **educational and nostalgic purposes only**. No comm
 ## 🌐 Stay Connected
 
 - 📺 Dev logs: [YouTube](https://www.youtube.com/@JamesMillsDeveloper) 
-- 🗨️ Join the community: <iframe src="https://discord.com/widget?id=1372449780373913621&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+- 🗨️ Join the community: [Discord](https://discord.gg/M8ESJdDJmY)
 - 🛠️ Follow updates on [GitHub](https://github.com/yourusername/jak-and-daxter-ecocharged)
 
 ---
