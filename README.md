@@ -43,11 +43,12 @@ cd jak-and-daxter-ecocharged
 
 ## 📸 Screenshots
 
+_Coming soon_
 <!-- Add screenshots or gifs of gameplay here -->
-<p align="center">
+<!-- <p align="center">
   <img src="screenshot1.png" width="400"/>
   <img src="screenshot2.gif" width="400"/>
-</p>
+</p>-->
 
 ---
 
@@ -79,15 +80,15 @@ This remake is intended for **educational and nostalgic purposes only**. No comm
 ## ❤️ Credits
 
 - Original game by **Naughty Dog**
-- UE5 Remake by **[Your Name / Team Name]**
+- UE5 Remake by **James Mills**
 - Special thanks to the **Jak and Daxter community** for keeping the legacy alive!
 
 ---
 
 ## 🌐 Stay Connected
 
-- 📺 Dev logs: _Coming soon_  
-- 🗨️ Join the community: _[Discord link]_  
+- 📺 Dev logs: [YouTube](https://www.youtube.com/@JamesMillsDeveloper) 
+- 🗨️ Join the community: _Discord Coming soon_  
 - 🛠️ Follow updates on [GitHub](https://github.com/yourusername/jak-and-daxter-ecocharged)
 
 ---
