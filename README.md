@@ -12,7 +12,6 @@
 - 🔹 **Modern visuals** powered by Unreal Engine 5 (Nanite, Lumen, etc.)  
 - 🔹 **Smooth platforming**, eco powers, and dynamic animations  
 - 🔹 **Fully explorable hubs** and seamless level transitions  
-- 🔹 Designed for **modularity** and future updates  
 
 ---
 
