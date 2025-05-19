@@ -50,6 +50,7 @@ AEcoCharacter::AEcoCharacter()
 		NavProperties.bCanSwim = true;
 	}
 
+	CrouchedEyeHeight = BaseEyeHeight;
 	CameraZoomMin = 300.f;
 	CameraZoomMax = 500.f;
 }
