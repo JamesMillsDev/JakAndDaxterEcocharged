@@ -24,6 +24,7 @@ public:
 
 public:
 	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
+	void GrantAbility(const TSubclassOf<UEcoGameplayAbility>& AbilityClass, UEcoAbilitySystemComponent* AbilitySystem, int32 Level, UObject* SourceObject);
 
 	void Bind(class UInputConfigDataAsset* InputConfig, class UEnhancedInputComponent* EnhancedInput, AEcoPlayerController* Controller,
 		void(AEcoPlayerController::* StartedFunc)(const int32), void(AEcoPlayerController::* EndedFunc)(const int32)) const;
@@ -34,5 +35,8 @@ protected:
 protected:
 	UEcoGameplayAbility();
 	UEcoGameplayAbility(EEcoInputs ID);
+
+protected:
+	virtual void AbilityGranted(const FGameplayAbilitySpecHandle Handle, UEcoAbilitySystemComponent* AbilitySystem);
 
 };

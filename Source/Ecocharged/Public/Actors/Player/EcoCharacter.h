@@ -19,9 +19,6 @@ public:
 	// Sets default values for this character's properties
 	AEcoCharacter();
 
-public:
-	void ApplyZoom(float Amount);
-
 protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void PossessedBy(AController* NewController) override;
@@ -35,11 +32,5 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = Components, meta = (AllowPrivateAccess = true))
 	class USpringArmComponent* CameraBoom;
-
-	UPROPERTY(EditAnywhere, Category = Camera, meta = (AllowPrivateAccess = true))
-	float CameraZoomMin;
-
-	UPROPERTY(EditAnywhere, Category = Camera, meta = (AllowPrivateAccess = true))
-	float CameraZoomMax;
 
 };

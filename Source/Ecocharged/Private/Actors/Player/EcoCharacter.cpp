@@ -25,9 +25,11 @@ AEcoCharacter::AEcoCharacter()
 
 	JumpMaxCount = 2;
 
+	constexpr float CapsuleHeight = 85.f;
+
 	if(UCapsuleComponent* Capsule = GetCapsuleComponent())
 	{
-		Capsule->InitCapsuleSize(35.f, 90.f);
+		Capsule->InitCapsuleSize(35.f, CapsuleHeight);
 
 		CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("Boom Arm"));
 		CameraBoom->SetupAttachment(Capsule);
@@ -44,6 +46,8 @@ AEcoCharacter::AEcoCharacter()
 	{
 		Movement->RotationRate = { 0, 0, 500.f };
 		Movement->bOrientRotationToMovement = true;
+		Movement->SetCrouchedHalfHeight(CapsuleHeight);
+		Movement->bUseFlatBaseForFloorChecks = true;
 
 		FNavAgentProperties& NavProperties = Movement->GetNavAgentPropertiesRef();
 		NavProperties.bCanCrouch = true;
@@ -51,15 +55,6 @@ AEcoCharacter::AEcoCharacter()
 	}
 
 	CrouchedEyeHeight = BaseEyeHeight;
-	CameraZoomMin = 300.f;
-	CameraZoomMax = 500.f;
-}
-
-void AEcoCharacter::ApplyZoom(float Amount)
-{
-	CameraBoom->TargetArmLength += Amount;
-
-	CameraBoom->TargetArmLength = FMath::Clamp(CameraBoom->TargetArmLength, CameraZoomMin, CameraZoomMax);
 }
 
 void AEcoCharacter::Tick(float DeltaTime)

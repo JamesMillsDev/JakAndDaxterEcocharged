@@ -135,14 +135,15 @@ void AEcoPlayerController::GiveAbilities()
 		{
 			if (DefaultAbility)
 			{
-				AbilitySystem->GiveAbility(
+				DefaultAbility.GetDefaultObject()->GrantAbility(DefaultAbility, AbilitySystem, 1, this);
+				/*AbilitySystem->GiveAbility(
 					FGameplayAbilitySpec(
 						DefaultAbility.Get(), 
 						1,
 						static_cast<int32>(DefaultAbility.GetDefaultObject()->ID()), 
 						this
 					)
-				);
+				);*/
 			}
 		}
 	}
@@ -172,7 +173,7 @@ void AEcoPlayerController::Look(const FInputActionValue& Value)
 	if (IsValid(CurrentCharacter))
 	{
 		CurrentCharacter->AddControllerYawInput(LookVector.X);
-		CurrentCharacter->ApplyZoom(LookVector.Y);
+		CurrentCharacter->AddControllerPitchInput(LookVector.Y);
 	}
 }
 

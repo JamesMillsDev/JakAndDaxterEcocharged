@@ -3,10 +3,14 @@
 
 #include "GAS/Abilities/EcoJumpAbility.h"
 
+#include "AbilitySystemComponent.h"
+
 #include "Actors/Player/EcoCharacter.h"
 
+#include "GAS/EcoAbilitySystemComponent.h"
+
 UEcoJumpAbility::UEcoJumpAbility()
-	: UEcoGameplayAbility{ EEcoInputs::Jump }
+	: UEcoGameplayAbility{ EEcoInputs::Jump }, JumpTimeSpacing{ 1.f }
 {
 }
 
@@ -14,8 +18,15 @@ void UEcoJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
+	ActorInfo->AbilitySystemComponent->RemoveLooseGameplayTag(CanJumpTag);
+
 	if (AEcoCharacter* Char = Cast<AEcoCharacter>(ActorInfo->AvatarActor))
 	{
+		FTimerDelegate TimerDelegate = FTimerDelegate::CreateUObject(
+			this, &UEcoJumpAbility::ResetJumpTimer, ActorInfo->AbilitySystemComponent
+		);
+
+		Char->GetWorldTimerManager().SetTimer(TimerHandle, TimerDelegate, 1.f, false);
 		Char->Jump();
 	}
 }
@@ -28,4 +39,22 @@ void UEcoJumpAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const 
 	{
 		Char->StopJumping();
 	}
+}
+
+bool UEcoJumpAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags,
+	const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
+{
+	return ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(CanJumpTag);
+}
+
+void UEcoJumpAbility::AbilityGranted(const FGameplayAbilitySpecHandle Handle, UEcoAbilitySystemComponent* AbilitySystem)
+{
+	CanJumpTag = FGameplayTag::RequestGameplayTag("Jak.Jump.Allowed");
+	AbilitySystem->AddLooseGameplayTag(CanJumpTag);
+}
+
+void UEcoJumpAbility::ResetJumpTimer(TWeakObjectPtr<UAbilitySystemComponent> AbilitySystem)
+{
+	AbilitySystem->AddLooseGameplayTag(CanJumpTag);
 }
